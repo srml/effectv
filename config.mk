@@ -51,7 +51,7 @@ DEFAULT_VIDEO_DEVICE = "/dev/video0"
 ifeq ($(ARCH), i686-linux)
 ###CONFIG.arch = -DI686
 CFLAGS.opt = -O3 -fomit-frame-pointer -funroll-loops -pthread
-LIBS.extra = -pthread
+LIBS.extra = -pthread -lv4l1
 endif
 
 ## PlayStaion2

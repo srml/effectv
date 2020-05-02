@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <libv4l1-videodev.h>
+#include <libv4l1.h>
 #include <pthread.h>
 #include <errno.h>
 #include "v4lutils.h"
@@ -66,7 +67,7 @@ int v4lopen(char *name, v4ldevice *vd)
 		name = DEFAULT_DEVICE;
 
 	if(v4l_debug) fprintf(stderr, "v4lopen:open...\n");
-	if((vd->fd = open(name,O_RDWR)) < 0) {
+	if((vd->fd = v4l1_open(name,O_RDWR)) < 0) {
 		snprintf(buf, STRBUF_LENGTH, "v4lopen: failed to open %s", name);
 		v4lperror(buf);
 		return -1;
@@ -77,7 +78,7 @@ int v4lopen(char *name, v4ldevice *vd)
 	if(v4l_debug) fprintf(stderr, "v4lopen:VIDIOCGCHAN...\n");
 	for(i=0;i<vd->capability.channels;i++) {
 		vd->channel[i].channel = i;
-		if(ioctl(vd->fd, VIDIOCGCHAN, &(vd->channel[i])) < 0) {
+		if(v4l1_ioctl(vd->fd, VIDIOCGCHAN, &(vd->channel[i])) < 0) {
 			v4lperror("v4lopen:VIDIOCGCHAN");
 			return -1;
 		}
@@ -96,7 +97,7 @@ int v4lopen(char *name, v4ldevice *vd)
 int v4lclose(v4ldevice *vd)
 {
 	if(v4l_debug) fprintf(stderr, "v4lclose:close...\n");
-	close(vd->fd);
+	v4l1_close(vd->fd);
 	if(v4l_debug) fprintf(stderr, "v4lclose:quit\n");
 	return 0;
 }
@@ -109,7 +110,7 @@ int v4lclose(v4ldevice *vd)
 int v4lgetcapability(v4ldevice *vd)
 {
 	if(v4l_debug) fprintf(stderr, "v4lgetcapability:VIDIOCGCAP...\n");
-	if(ioctl(vd->fd, VIDIOCGCAP, &(vd->capability)) < 0) {
+	if(v4l1_ioctl(vd->fd, VIDIOCGCAP, &(vd->capability)) < 0) {
 		v4lperror("v4lopen:VIDIOCGCAP");
 		return -1;
 	}
@@ -144,7 +145,7 @@ int v4lsetdefaultnorm(v4ldevice *vd, int norm)
  */
 int v4lgetsubcapture(v4ldevice *vd)
 {
-	if(ioctl(vd->fd, VIDIOCGCAPTURE, &(vd->capture)) < 0) {
+	if(v4l1_ioctl(vd->fd, VIDIOCGCAPTURE, &(vd->capture)) < 0) {
 		v4lperror("v4lgetsubcapture:VIDIOCGCAPTURE");
 		return -1;
 	}
@@ -169,7 +170,7 @@ int v4lsetsubcapture(v4ldevice *vd, int x, int y, int width, int height, int dec
 	vd->capture.height = height;
 	vd->capture.decimation = decimation;
 	vd->capture.flags = flags;
-	if(ioctl(vd->fd, VIDIOCGCAPTURE, &(vd->capture)) < 0) {
+	if(v4l1_ioctl(vd->fd, VIDIOCGCAPTURE, &(vd->capture)) < 0) {
 		v4lperror("v4lsetsubcapture:VIDIOCSCAPTURE");
 		return -1;
 	}
@@ -183,7 +184,7 @@ int v4lsetsubcapture(v4ldevice *vd, int x, int y, int width, int height, int dec
  */
 int v4lgetframebuffer(v4ldevice *vd)
 {
-	if(ioctl(vd->fd, VIDIOCGFBUF, &(vd->buffer)) < 0) {
+	if(v4l1_ioctl(vd->fd, VIDIOCGFBUF, &(vd->buffer)) < 0) {
 		v4lperror("v4lgetframebuffer:VIDIOCGFBUF");
 		return -1;
 	}
@@ -207,7 +208,7 @@ int v4lsetframebuffer(v4ldevice *vd, void *base, int width, int height, int dept
 	vd->buffer.height = height;
 	vd->buffer.depth = depth;
 	vd->buffer.bytesperline = bpl;
-	if(ioctl(vd->fd, VIDIOCSFBUF, &(vd->buffer)) < 0) {
+	if(v4l1_ioctl(vd->fd, VIDIOCSFBUF, &(vd->buffer)) < 0) {
 		v4lperror("v4lsetframebuffer:VIDIOCSFBUF");
 		return -1;
 	}
@@ -221,7 +222,7 @@ int v4lsetframebuffer(v4ldevice *vd, void *base, int width, int height, int dept
  */
 int v4loverlaystart(v4ldevice *vd)
 {
-	if(ioctl(vd->fd, VIDIOCCAPTURE, 1) < 0) {
+	if(v4l1_ioctl(vd->fd, VIDIOCCAPTURE, 1) < 0) {
 		v4lperror("v4loverlaystart:VIDIOCCAPTURE");
 		return -1;
 	}
@@ -236,7 +237,7 @@ int v4loverlaystart(v4ldevice *vd)
  */
 int v4loverlaystop(v4ldevice *vd)
 {
-	if(ioctl(vd->fd, VIDIOCCAPTURE, 0) < 0) {
+	if(v4l1_ioctl(vd->fd, VIDIOCCAPTURE, 0) < 0) {
 		v4lperror("v4loverlaystop:VIDIOCCAPTURE");
 		return -1;
 	}
@@ -252,7 +253,7 @@ int v4loverlaystop(v4ldevice *vd)
  */
 int v4lsetchannel(v4ldevice *vd, int ch)
 {
-	if(ioctl(vd->fd, VIDIOCSCHAN, &(vd->channel[ch])) < 0) {
+	if(v4l1_ioctl(vd->fd, VIDIOCSCHAN, &(vd->channel[ch])) < 0) {
 		v4lperror("v4lsetchannel:VIDIOCSCHAN");
 		return -1;
 	}
@@ -273,7 +274,7 @@ int v4lmaxchannel(v4ldevice *vd)
 int v4lsetfreq(v4ldevice *vd, int freq)
 {
 	unsigned long longfreq=(freq*16)/1000;
-	if(ioctl(vd->fd, VIDIOCSFREQ, &longfreq) < 0) {
+	if(v4l1_ioctl(vd->fd, VIDIOCSFREQ, &longfreq) < 0) {
 		v4lperror("v4lsetfreq:VIDIOCSFREQ");
 		return -1;
 	}
@@ -300,7 +301,7 @@ int v4lsetchannelnorm(v4ldevice *vd, int ch, int norm)
  */
 int v4lgetpicture(v4ldevice *vd)
 {
-	if(ioctl(vd->fd, VIDIOCGPICT, &(vd->picture)) < 0) {
+	if(v4l1_ioctl(vd->fd, VIDIOCGPICT, &(vd->picture)) < 0) {
 		v4lperror("v4lgetpicture:VIDIOCGPICT");
 		return -1;
 	}
@@ -329,7 +330,7 @@ int v4lsetpicture(v4ldevice *vd, int br, int hue, int col, int cont, int white)
 		vd->picture.contrast = cont;
 	if(white>=0)
 		vd->picture.whiteness = white;
-	if(ioctl(vd->fd, VIDIOCSPICT, &(vd->picture)) < 0) {
+	if(v4l1_ioctl(vd->fd, VIDIOCSPICT, &(vd->picture)) < 0) {
 		v4lperror("v4lsetpicture:VIDIOCSPICT");
 		return -1;
 	}
@@ -346,7 +347,7 @@ int v4lsetpalette(v4ldevice *vd, int palette)
 {
 	vd->picture.palette = palette;
 	vd->mmap.format = palette;
-	if(ioctl(vd->fd, VIDIOCSPICT, &(vd->picture)) < 0) {
+	if(v4l1_ioctl(vd->fd, VIDIOCSPICT, &(vd->picture)) < 0) {
 		v4lperror("v4lsetpalette:VIDIOCSPICT");
 		return -1;
 	}
@@ -360,7 +361,7 @@ int v4lsetpalette(v4ldevice *vd, int palette)
  */
 int v4lgetmbuf(v4ldevice *vd)
 {
-	if(ioctl(vd->fd, VIDIOCGMBUF, &(vd->mbuf))<0) {
+	if(v4l1_ioctl(vd->fd, VIDIOCGMBUF, &(vd->mbuf))<0) {
 		v4lperror("v4lgetmbuf:VIDIOCGMBUF");
 		return -1;
 	}
@@ -376,7 +377,7 @@ int v4lmmap(v4ldevice *vd)
 {
 	if(v4lgetmbuf(vd)<0)
 		return -1;
-	if((vd->map = mmap(0, vd->mbuf.size, PROT_READ|PROT_WRITE, MAP_SHARED, vd->fd, 0)) < 0) {
+	if((vd->map = v4l1_mmap(0, vd->mbuf.size, PROT_READ|PROT_WRITE, MAP_SHARED, vd->fd, 0)) < 0) {
 		v4lperror("v4lmmap:mmap");
 		return -1;
 	}
@@ -390,7 +391,7 @@ int v4lmmap(v4ldevice *vd)
  */
 int v4lmunmap(v4ldevice *vd)
 {
-	if(munmap(vd->map, vd->mbuf.size) < 0) {
+	if(v4l1_munmap(vd->map, vd->mbuf.size) < 0) {
 		v4lperror("v4lmunmap:munmap");
 		return -1;
 	}
@@ -428,7 +429,7 @@ int v4lgrabstart(v4ldevice *vd, int frame)
 		fprintf(stderr, "v4lgrabstart: frame %d is already used to grab.\n", frame);
 	}
 	vd->mmap.frame = frame;
-	if(ioctl(vd->fd, VIDIOCMCAPTURE, &(vd->mmap)) < 0) {
+	if(v4l1_ioctl(vd->fd, VIDIOCMCAPTURE, &(vd->mmap)) < 0) {
 		v4lperror("v4lgrabstart:VIDIOCMCAPTURE");
 		return -1;
 	}
@@ -448,7 +449,7 @@ int v4lsync(v4ldevice *vd, int frame)
 	if(vd->framestat[frame] == 0) {
 		fprintf(stderr, "v4lsync: grabbing to frame %d is not started.\n", frame);
 	}
-	if(ioctl(vd->fd, VIDIOCSYNC, &frame) < 0) {
+	if(v4l1_ioctl(vd->fd, VIDIOCSYNC, &frame) < 0) {
 		v4lperror("v4lsync:VIDIOCSYNC");
 		return -1;
 	}
