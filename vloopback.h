@@ -16,3 +16,7 @@ void vloopback_quit(void);
 int vloopback_push(void);
 
 #endif /* __VLOOPBACK_H__ */
+
+#ifndef BASE_VIDIOCPRIVATE
+#define BASE_VIDIOCPRIVATE 192
+#endif
