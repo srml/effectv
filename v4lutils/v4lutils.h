@@ -25,14 +25,35 @@
 #define __V4LUTILS_H__
 
 #include <sys/types.h>
-#include <linux/videodev.h>
+#include <libv4l1-videodev.h>
 #include <pthread.h>
+#include <linux/types.h>
 
 /*
  * Error message displaying level
  */
 #define V4L_PERROR_NONE (0)
 #define V4L_PERROR_ALL (1)
+
+struct video_capture
+{
+	__u32   x,y;                    /* Offsets into image */
+	__u32   width, height;          /* Area to capture */
+	__u16   decimation;             /* Decimation divider */
+	__u16   flags;                  /* Flags for capture */
+#define VIDEO_CAPTURE_ODD               0       /* Temporal */
+#define VIDEO_CAPTURE_EVEN              1
+};
+
+struct video_unit
+{
+	int 	video;		/* Video minor */
+	int	vbi;		/* VBI minor */
+	int	radio;		/* Radio minor */
+	int	audio;		/* Audio minor */
+	int	teletext;	/* Teletext minor */
+};
+#define VIDIOCGCAPTURE		_IOR('v',22, struct video_capture)	/* Get subcapture */
 
 /*
  * Video4Linux Device Structure

@@ -27,7 +27,7 @@ USE_NASM = yes
 
 ### vloopback
 ## comment out next line if you want to disable vloopback support.
-USE_VLOOPBACK = yes
+#USE_VLOOPBACK = yes
 
 ## choose vloopback version (only one).
 # version 0.91 or later

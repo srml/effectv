@@ -17,7 +17,7 @@
 #include <sys/wait.h>
 #include <sys/mman.h>
 #include <signal.h>
-#include <linux/videodev.h>
+#include <libv4l1-videodev.h>
 #include <v4lutils.h>
 #include <pthread.h>
 

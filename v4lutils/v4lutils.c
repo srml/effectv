@@ -28,7 +28,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <linux/videodev.h>
+#include <libv4l1-videodev.h>
 #include <pthread.h>
 #include <errno.h>
 #include "v4lutils.h"
