@@ -23,7 +23,7 @@ USE_MMX = yes
 
 ### NASM
 ## comment out next line if you want not to use NASM.
-USE_NASM = yes
+#USE_NASM = yes
 
 ### vloopback
 ## comment out next line if you want to disable vloopback support.
@@ -49,8 +49,9 @@ DEFAULT_VIDEO_DEVICE = "/dev/video0"
 ## architecture dependent settings
 ## i686-linux
 ifeq ($(ARCH), i686-linux)
-CONFIG.arch = -DI686
-CFLAGS.opt = -march=pentiumpro -O3 -fomit-frame-pointer -funroll-loops
+###CONFIG.arch = -DI686
+CFLAGS.opt = -O3 -fomit-frame-pointer -funroll-loops -pthread
+LIBS.extra = -pthread
 endif
 
 ## PlayStaion2
