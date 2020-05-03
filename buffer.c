@@ -18,8 +18,8 @@ static int tail;
 
 int sharedbuffer_init(void)
 {
-	/* maximum size of the frame buffer is for screen size * 2 */
-	sharedbuffer_length = screen_width * screen_height * PIXEL_SIZE * 2;
+	/* maximum size of the frame buffer is for screen size * 3 */
+	sharedbuffer_length = screen_width * screen_height * PIXEL_SIZE * 3;
 
 	sharedbuffer = (unsigned char *)malloc(sharedbuffer_length);
 	if(sharedbuffer == NULL) {
