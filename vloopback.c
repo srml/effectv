@@ -18,6 +18,7 @@
 #include <sys/mman.h>
 #include <signal.h>
 #include <libv4l1-videodev.h>
+#include <libv4l1.h>
 #include <v4lutils.h>
 #include <pthread.h>
 
@@ -84,7 +85,7 @@ static unsigned char *vloopback_mmap(int dev, int memsize)
 {
 	unsigned char *map;
 	
-	map = mmap(0, memsize, PROT_READ|PROT_WRITE, MAP_SHARED, dev, 0);
+	map = v4l1_mmap(0, memsize, PROT_READ|PROT_WRITE, MAP_SHARED, dev, 0);
 	if(map < 0) {
 		perror("vloopback_mmap:mmap");
 		return NULL;
@@ -96,7 +97,7 @@ static unsigned char *vloopback_mmap(int dev, int memsize)
 /* never used */
 static int vloopback_munmap(unsigned char *map, int memsize)
 {
-	if(munmap(map, memsize) < 0) {
+	if(v4l1_munmap(map, memsize) < 0) {
 		perror("vloopback_munmap:munmap");
 		return -1;
 	}
@@ -344,7 +345,7 @@ static int v4l_ioctlhandler(unsigned int cmd, void *arg)
 
 static int signal_loop_init(void)
 {
-	outputfd = open(output_devname, O_RDWR);
+	outputfd = v4l1_open(output_devname, O_RDWR);
 	if(outputfd < 0) {
 		fprintf(stderr, "vloopback: couldn't open output device file %s\n",output_devname);
 		return -1;
@@ -413,9 +414,9 @@ static void *signal_loop(void *arg)
 				 * a client. */
 				memset(ioctlbuf+sizeof(unsigned long int), 0xff, MAXIOCTL-sizeof(unsigned long int));
 				fprintf(stderr, "vloopback: ioctl %lx unsuccessfully handled.\n", cmd);
-				ioctl(outputfd, VIDIOCSINVALID);
+				v4l1_ioctl(outputfd, VIDIOCSINVALID);
 			}
-			if(ioctl(outputfd, cmd, ioctlbuf+sizeof(unsigned long int))) {
+			if(v4l1_ioctl(outputfd, cmd, ioctlbuf+sizeof(unsigned long int))) {
 				fprintf(stderr, "vloopback: ioctl %lx unsuccessfull.\n", cmd);
 			}
 #else
@@ -424,7 +425,7 @@ static void *signal_loop(void *arg)
 				memset(ioctlbuf+1, 0xff, MAXIOCTL-1);
 				fprintf(stderr, "vloopback: ioctl %d unsuccessfull.\n", ioctlbuf[0]);
 			}
-			ioctl(outputfd, ioctlbuf[0], ioctlbuf+1);
+			v4l1_ioctl(outputfd, ioctlbuf[0], ioctlbuf+1);
 #endif
 		}
 	}
@@ -461,7 +462,7 @@ int vloopback_init(char *name)
  * This function is registerd in vloopback_init() by calling atexit(). */
 void vloopback_quit(void)
 {
-	close(outputfd);
+	v4l1_close(outputfd);
 	fprintf(stderr, "vloopback: video pipelining is stopped.\n");
 }
 
