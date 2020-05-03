@@ -43,3 +43,22 @@ Options:
                    automatically by default.
   -vloopback FILE  use device FILE for output of vloopback device
 ```
+
+### Use v4l2loopback
+Install the v4l2loopback kernel module and the tools. Debian:
+```
+# apt install v4l2loopback-utils 
+```
+Load the kernel module and force the capabilities:
+```
+# modprobe v4l2loopback exclusive_caps=1
+$ v4l2loopback-ctl set-caps "video/x-raw,format=UYVY,width=1280,height=720" /dev/video2
+```
+
+Now effectv should be able to use the loopback device:
+```
+$ effectv -vloopback /dev/video2
+```
+
+# More information
+See [original README](README).
